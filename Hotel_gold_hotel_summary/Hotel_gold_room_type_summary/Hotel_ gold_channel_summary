@@ -1,0 +1,9 @@
+CREATE OR REFRESH MATERIALIZED VIEW gold_data_quality AS
+SELECT COUNT(*)                                                   AS bronze_rows,
+       COUNT(*) - COUNT(DISTINCT booking_id)                      AS duplicate_rows,
+       SUM(CASE WHEN check_out_date <= check_in_date THEN 1 ELSE 0 END) AS invalid_date_rows,
+       SUM(CASE WHEN city IS NULL THEN 1 ELSE 0 END)              AS missing_city_rows,
+       ...   -- add negative rate, missing channel, missing amount, missing nights
+       (SELECT COUNT(*) FROM silver_bookings_clean)               AS clean_rows,
+       (SELECT COUNT(*) FROM silver_bookings_rejected)            AS rejected_rows
+FROM bronze_hotel_bookings;
